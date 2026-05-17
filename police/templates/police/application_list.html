@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Applications</title>
+  </head>
+  <body>
+    <h1>Application List</h1>
+    <p><b>Name:</b> {{ personnel.full_name }}</p>
+
+    <table border="1" cellpadding="6">
+      <tr>
+        <th>Applicant</th>
+        <th>Path</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th>Created</th>
+      </tr>
+      {% for a in applications %}
+        <tr>
+          <td>{{ a.applicant_name }}</td>
+          <td>{{ a.get_application_path_display }}</td>
+          <td>{{ a.department.name }}</td>
+          <td>{{ a.status }}</td>
+          <td>{{ a.created_at }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">No applications</td></tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
+
