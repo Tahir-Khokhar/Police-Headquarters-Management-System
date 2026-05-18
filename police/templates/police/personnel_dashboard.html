@@ -1,44 +1,231 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Personnel Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Police Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: rgba(255, 255, 255, 0.06);
+        --card2: rgba(255, 255, 255, 0.09);
+        --text: #e8eefc;
+        --muted: rgba(232, 238, 252, 0.7);
+        --accent: #4f8cff;
+        --accent2: #2ce6a6;
+        --danger: #ff5b6e;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: radial-gradient(800px 500px at 20% 0%, rgba(79, 140, 255, 0.25), transparent),
+          radial-gradient(700px 450px at 100% 10%, rgba(44, 230, 166, 0.18), transparent),
+          var(--bg);
+        color: var(--text);
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 18px 60px;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.3px;
+      }
+      .brand p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .pill {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 14px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .card h2 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: rgba(232, 238, 252, 0.92);
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .stat .label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .stat .value {
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .stat.training .value { color: var(--accent2); }
+      .stat.duty .value { color: var(--accent); }
+      .stat.leave .value { color: var(--danger); }
+
+      .col-4 { grid-column: span 4; }
+      .col-8 { grid-column: span 8; }
+      .col-12 { grid-column: span 12; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 12px;
+      }
+      th, td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 14px;
+      }
+      th {
+        color: rgba(232, 238, 252, 0.85);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .kv {
+        background: var(--card2);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .kv .k { color: var(--muted); font-size: 13px; }
+      .kv .v { margin-top: 6px; font-weight: 700; }
+
+      a { color: #cfe0ff; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .footer-note { color: var(--muted); font-size: 12px; margin-top: 14px; }
+
+      @media (max-width: 900px) {
+        .col-4 { grid-column: span 6; }
+        .col-8 { grid-column: span 12; }
+      }
+      @media (max-width: 600px) {
+        .col-4 { grid-column: span 12; }
+        .meta { grid-template-columns: 1fr; }
+      }
+    </style>
   </head>
   <body>
-    <h1>Personnel Dashboard</h1>
-    <p><b>Name:</b> {{ personnel.full_name }}</p>
-    <p><b>Gender:</b> {{ personnel.get_gender_display }}</p>
-    <p><b>Department:</b> {{ personnel.department.name }}</p>
-    <p><b>Current Rank:</b> {{ personnel.rank.title }}</p>
+    <div class="container">
+      <div class="topbar">
+        <div class="brand">
+          <h1>Police Personnel Management</h1>
+          <p>Recruitment, training, upgrades, and duty assignment — at a glance.</p>
+        </div>
+        <div class="pill">
+          {% if is_admin %}Role: <b>Admin</b>{% else %}Role: <b>Personnel</b>{% endif %}
+        </div>
+      </div>
 
-    {% if is_admin %}
-      <p><b>Role:</b> Admin</p>
-    {% else %}
-      <p><b>Role:</b> Personnel</p>
-    {% endif %}
+      <!-- Home / Global Summary Cards -->
+      <div class="grid">
+        <div class="card col-4">
+          <div class="stat duty">
+            <div class="label">On Duty</div>
+            <div class="value">{{ duty_personnel_count|default:0 }}</div>
+          </div>
+        </div>
+        <div class="card col-4">
+          <div class="stat training">
+            <div class="label">In Training (Completed)</div>
+            <div class="value">{{ training_personnel_count|default:0 }}</div>
+          </div>
+        </div>
+        <div class="card col-4">
+          <div class="stat leave">
+            <div class="label">On Leave</div>
+            <div class="value">{{ leave_personnel_count|default:0 }}</div>
+          </div>
+        </div>
 
-    <h2>Applications</h2>
-    <table border="1" cellpadding="6">
-      <tr>
-        <th>Applicant</th>
-        <th>Path</th>
-        <th>Department</th>
-        <th>Status</th>
-        <th>Created</th>
-      </tr>
-      {% for a in applications %}
-        <tr>
-          <td>{{ a.applicant_name }}</td>
-          <td>{{ a.get_application_path_display }}</td>
-          <td>{{ a.department.name }}</td>
-          <td>{{ a.status }}</td>
-          <td>{{ a.created_at }}</td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="5">No applications</td></tr>
-      {% endfor %}
-    </table>
+        <!-- Personnel Details -->
+        <div class="card col-8">
+          <h2>Your Details</h2>
+          <div class="meta">
+            <div class="kv">
+              <div class="k">Name</div>
+              <div class="v">{{ personnel.full_name }}</div>
+            </div>
+            <div class="kv">
+              <div class="k">Gender</div>
+              <div class="v">{{ personnel.get_gender_display }}</div>
+            </div>
+            <div class="kv">
+              <div class="k">Department</div>
+              <div class="v">{{ personnel.department.name }}</div>
+            </div>
+            <div class="kv">
+              <div class="k">Current Rank</div>
+              <div class="v">{{ personnel.rank.title }}</div>
+            </div>
+          </div>
+          <div class="footer-note">Tip: Use Admin group members to see all applications and system-wide counts.</div>
+        </div>
 
+        <!-- Applications -->
+        <div class="card col-12">
+          <h2>Applications</h2>
+          <table>
+            <tr>
+              <th>Applicant</th>
+              <th>Path</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+            {% for a in applications %}
+              <tr>
+                <td>{{ a.applicant_name }}</td>
+                <td>{{ a.get_application_path_display }}</td>
+                <td>{{ a.department.name }}</td>
+                <td>{{ a.status }}</td>
+                <td>{{ a.created_at }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">No applications</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
+
 
